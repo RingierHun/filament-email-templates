@@ -19,24 +19,8 @@ class FilamentEmailTemplatesServiceProvider extends PackageServiceProvider
             ->name('notebrainslab-filament-email-templates')
             ->hasConfigFile('filament-email-templates')
             ->hasViews('filament-email-templates')
-            ->hasTranslations()
             ->hasMigration('create_filament_email_templates_table')
-            ->hasMigration('create_filament_email_themes_table')      // kept for existing installs
             ->hasMigration('restructure_filament_email_templates_table') // new unified schema
             ->hasCommand(FilamentEmailTemplatesCommand::class);
-    }
-
-    public function packageRegistered(): void
-    {
-        parent::packageRegistered();
-        
-        $this->app->register(\NoteBrainsLab\FilamentEmailTemplates\Providers\EventServiceProvider::class);
-    }
-
-    public function packageBooted(): void
-    {
-        parent::packageBooted();
-
-        // Register any custom package booted logic here
     }
 }

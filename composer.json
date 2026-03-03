@@ -37,11 +37,6 @@
             "NoteBrainsLab\\FilamentEmailTemplates\\": "src/"
         }
     },
-    "autoload-dev": {
-        "psr-4": {
-            "NoteBrainsLab\\FilamentEmailTemplates\\Tests\\": "tests/"
-        }
-    },
     "scripts": {
         "test": "./vendor/bin/pest",
         "test-coverage": "./vendor/bin/pest --coverage"
@@ -56,10 +51,7 @@
         "laravel": {
             "providers": [
                 "NoteBrainsLab\\FilamentEmailTemplates\\FilamentEmailTemplatesServiceProvider"
-            ],
-            "aliases": {
-                "FilamentEmailTemplates": "NoteBrainsLab\\FilamentEmailTemplates\\Facades\\FilamentEmailTemplates"
-            }
+            ]
         }
     },
     "minimum-stability": "dev",

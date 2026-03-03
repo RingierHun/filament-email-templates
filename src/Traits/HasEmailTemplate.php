@@ -3,62 +3,92 @@
 namespace NoteBrainsLab\FilamentEmailTemplates\Traits;
 
 use NoteBrainsLab\FilamentEmailTemplates\Models\EmailTemplate;
+use Illuminate\Support\Facades\Blade;
 
 trait HasEmailTemplate
 {
     /**
      * The unique key identifying which template to use.
-     * @var string
      */
     public string $templateKey;
 
     /**
      * Variables to replace {{placeholders}} in the template.
-     * @var array
      */
     public array $templateVariables = [];
 
     /**
-     * Fetch the template by key, replace ALL placeholders, and return
-     * the fully merged email ready to send.
+     * Fetch the template by key and return the fully merged email.
+     * Prioritizes body_html (Unlayer Export) for pixel-perfect 1:1 matching.
      */
     public function build()
     {
-        $template = EmailTemplate::where('key', $this->templateKey)
-            ->where('is_active', true)
-            ->first();
+        try {
+            $template = EmailTemplate::where('key', $this->templateKey)->first();
 
-        if (!$template) {
-            return $this->subject('Template Not Found')
-                ->html('<p>Email template configuration is missing for key: <strong>' . e($this->templateKey) . '</strong></p>');
+            if (!$template) {
+                return $this->subject('Template Not Found')
+                    ->html('<p>Email template configuration is missing for key: <strong>' . e($this->templateKey) . '</strong></p>');
+            }
+
+            // 1. Render Subject using Blade
+            $rawSubject = $this->prepareBladeTemplate($template->subject ?? 'No Subject');
+            $subject = Blade::render($rawSubject, $this->templateVariables ?? []);
+
+            // 2. Render Body — Use body_html (The Unlayer Export)
+            $html = $template->body_html ?? '';
+
+            if (empty($html)) {
+                $html = '<p>The email content is empty for template: ' . e($this->templateKey) . '</p>';
+            }
+
+            // 3. Clean up HTML (Protect against style stripping)
+            $html = preg_replace('/([\w-]+):\s*;\s*/', '', $html);
+            
+            // 4. Inject Variables into the HTML
+            $html = $this->injectTemplateVariables($html);
+
+            // 5. Final sanity check: ensure full HTML document
+            if (!str_contains(strtolower($html), '<html')) {
+                $html = '<!DOCTYPE html><html><body style="margin:0;padding:0;">' . $html . '</body></html>';
+            }
+
+            return $this->subject($subject)->html($html);
+
+        } catch (\Throwable $e) {
+            return $this->subject('Error: ' . ($this->templateKey ?? 'Unknown Template'))
+                ->html('<h3>Mail Template Rendering Error</h3><p>' . e($e->getMessage()) . '</p>');
         }
-
-        // 1. Parse placeholders in the Subject line
-        $subject = $this->parsePlaceholders($template->subject ?? '');
-
-        // 2. Parse ALL placeholders directly in the Full HTML Design
-        // No more ##body_content## wrapper needed.
-        $html = $this->parsePlaceholders($template->body_html ?? '');
-
-        if (empty(trim($html))) {
-            $html = '<p>No content has been designed for this email template yet.</p>';
-        }
-
-        return $this->subject($subject)->html($html);
     }
 
     /**
-     * Replace {{key}} and {{dot.nested}} placeholders using templateVariables.
-     * This supports any variable passed from the Mail class.
+     * Safely inject variables into the HTML string.
      */
-    protected function parsePlaceholders(string $content): string
+    protected function injectTemplateVariables(string $html): string
     {
-        return preg_replace_callback('/\{\{\s*(.*?)\s*\}\}/', function ($matches) {
-            $key = trim($matches[1]);
-            
-            // Replaces {{variable}} with data from $this->templateVariables
-            // If the variable is not found, it keeps the placeholder text.
-            return data_get($this->templateVariables, $key, $matches[0]);
-        }, $content);
+        foreach ($this->templateVariables as $key => $value) {
+            if (!is_scalar($value) && !(is_object($value) && method_exists($value, '__toString'))) {
+                continue;
+            }
+
+            $escapedValue = htmlspecialchars((string)$value, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
+
+            // Robust pattern to match standard and URL-encoded placeholders
+            $pattern = '/\{\{\s*((?:<[^>]+>|&nbsp;|\s)*)' . preg_quote($key, '/') . '((?:<[^>]+>|&nbsp;|\s)*)\s*\}\}/i';
+            $html = preg_replace($pattern, $escapedValue, $html);
+
+            $urlPattern = '/%7B%7B((?:%[^%]+|&nbsp;|\s)*)' . preg_quote($key, '/') . '((?:%[^%]+|&nbsp;|\s)*)%7D%7D/i';
+            $html = preg_replace($urlPattern, $escapedValue, $html);
+        }
+
+        return $html;
+    }
+
+    /**
+     * Convert {{var}} → {{$var}} for Blade subject rendering.
+     */
+    protected function prepareBladeTemplate(string $content): string
+    {
+        return preg_replace('/\{\{\s*(?!\$|@|!)([\w\.]+)\s*\}\}/', '{{ \$$1 }}', $content);
     }
 }

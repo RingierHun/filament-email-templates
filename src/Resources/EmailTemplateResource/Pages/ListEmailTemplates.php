@@ -13,7 +13,9 @@ class ListEmailTemplates extends ListRecords
     protected function getHeaderActions(): array
     {
         return [
-            Actions\CreateAction::make(),
+            Actions\CreateAction::make()
+                ->label('New Template')
+                ->icon('heroicon-m-plus-small'),
         ];
     }
 }

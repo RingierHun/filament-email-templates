@@ -11,9 +11,6 @@ class EmailTemplate extends Model
     protected $guarded = [];
 
     protected $casts = [
-        'is_active'   => 'boolean',
-        'recipients'  => 'array',
-        'attachments' => 'array',
         'body_json'   => 'array',
     ];
 }

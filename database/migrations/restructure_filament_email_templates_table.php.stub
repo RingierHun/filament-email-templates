@@ -20,17 +20,15 @@ return new class extends Migration
                 $table->dropColumn('body');
             }
 
-            // Event that triggers this email (e.g. Illuminate\Auth\Events\Registered)
-            $table->string('event')->nullable()->after('key');
+            // Drop is_active if exists
+            if (Schema::hasColumn('filament_email_templates', 'is_active')) {
+                $table->dropColumn('is_active');
+            }
 
-            // JSON array of recipient types: ['user', 'inviter', ...]
-            $table->json('recipients')->nullable()->after('event');
-
-            // JSON array of attachment keys
-            $table->json('attachments')->nullable()->after('recipients');
-
-            // Delay in minutes before sending
-            $table->unsignedInteger('delay_minutes')->default(0)->after('attachments');
+            // Drop event if exists
+            if (Schema::hasColumn('filament_email_templates', 'event')) {
+                $table->dropColumn('event');
+            }
 
             // Full Unlayer HTML (the rendered email)
             $table->longText('body_html')->nullable()->after('subject');
@@ -43,7 +41,9 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('filament_email_templates', function (Blueprint $table) {
-            $table->dropColumn(['event', 'recipients', 'attachments', 'delay_minutes', 'body_html', 'body_json']);
+            $table->dropColumn(['body_html', 'body_json']);
+            $table->string('event')->nullable()->after('key');
+            $table->boolean('is_active')->default(true);
             $table->longText('body')->nullable();
             $table->foreignId('theme_id')->nullable()->constrained('filament_email_themes')->nullOnDelete();
         });

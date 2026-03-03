@@ -12,6 +12,7 @@ class FilamentEmailTemplatesPlugin implements Plugin
     protected string $navigationGroup = 'Email Templates';
     protected ?string $navigationIcon = null;
     protected ?int $navigationSort = 1;
+    protected bool $navigationBadge = true;
 
     public function getId(): string
     {
@@ -51,6 +52,17 @@ class FilamentEmailTemplatesPlugin implements Plugin
         return $this->navigationSort;
     }
 
+    public function navigationBadge(bool $show = true): static
+    {
+        $this->navigationBadge = $show;
+        return $this;
+    }
+
+    public function isNavigationBadgeEnabled(): bool
+    {
+        return $this->navigationBadge;
+    }
+
     public function register(Panel $panel): void
     {
         $panel->resources([
@@ -60,9 +72,7 @@ class FilamentEmailTemplatesPlugin implements Plugin
 
     public function boot(Panel $panel): void
     {
-        if (config('filament-email-templates.register_notifications')) {
-            app(\NoteBrainsLab\FilamentEmailTemplates\FilamentEmailTemplates::class)->registerDefaultNotifications();
-        }
+        //
     }
 
     public static function make(): static
