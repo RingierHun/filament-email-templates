@@ -45,7 +45,7 @@
                                 var instance = self.getEditorInstance();
                                 if (instance) {
                                     instance.setAppearance({ theme: isDark ? 'modern_dark' : 'modern_light' });
-                                    instance.setBodyValues({ backgroundColor: isDark ? '#161616' : '#f9f9f9' });
+                                    // instance.setBodyValues({ backgroundColor: isDark ? '#161616' : '#f9f9f9' });
                                 } else if (window.unlayer) {
                                     unlayer.setTheme(isDark ? 'modern_dark' : 'modern_light');
                                 }
@@ -136,17 +136,17 @@
                                 appearance: {
                                     theme: isDarkMode ? 'modern_dark' : 'modern_light'
                                 },
-                                tools: {
-                                    bodies: {
-                                        properties: {
-                                            backgroundColor: {
-                                                editor: {
-                                                    defaultValue: isDarkMode ? '#161616' : '#f9f9f9',
-                                                },
-                                            },
-                                        },
-                                    },
-                                },
+                                // tools: {
+                                //     bodies: {
+                                //         properties: {
+                                //             backgroundColor: {
+                                //                 editor: {
+                                //                     defaultValue: isDarkMode ? '#161616' : '#f9f9f9',
+                                //                 },
+                                //             },
+                                //         },
+                                //     },
+                                // },
                             };
 
                             // Only append projectId if it's explicitly set and greater than 0

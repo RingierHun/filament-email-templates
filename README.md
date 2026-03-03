@@ -36,7 +36,7 @@ Run the install command to publish migrations and config:
 php artisan filament-email-templates:install
 ```
 
-Run migrations:
+Run the migrations if you didn’t execute them during installation:
 
 ```bash
 php artisan migrate
@@ -68,10 +68,10 @@ All options are optional — the plugin works out of the box with sensible defau
 
 ```php
 FilamentEmailTemplatesPlugin::make()
-    ->navigationGroup('Content')           // Default: 'Email Templates'
+    ->navigationGroup('Content') // Default: 'Email Templates'
     ->navigationIcon('heroicon-o-envelope-open') // Default: heroicon-o-envelope-open
-    ->navigationSort(5)                    // Default: 1
-    ->navigationBadge(true),              // Default: true — shows template count badge
+    ->navigationSort(5) // Default: 1
+    ->navigationBadge(true), // Default: true — shows template count badge
 ```
 
 | Method | Type | Default | Description |
@@ -86,14 +86,14 @@ FilamentEmailTemplatesPlugin::make()
 To enable the **Dark Theme** and **Image Uploads** in the Unlayer editor, you must set a valid Unlayer Project ID. Without it, the editor runs in anonymous demo mode and custom appearances are disabled.
 
 1. Create a free account at [unlayer.com](https://unlayer.com) and create a Project.
-2. Copy the **Project ID** from your project settings page (it's the number in the URL: `console.unlayer.com/emails/YOUR_PROJECT_ID/...`).
+2. Copy the **Project ID** from your project settings page.
 3. Add it to your `.env`:
 
 ```env
 UNLAYER_PROJECT_ID=YOUR_PROJECT_ID
 ```
 
-> **Note:** Even without a Project ID, the editor works fine for designing and saving templates. The only limitation is that dark mode isn’t available. For now, I’ve used a placeholder Project ID to enable dark mode. That said, I recommend creating a free developer account and using your own Project ID for proper configuration and long-term use.
+> **Note:** The editor works perfectly for designing and saving templates even without a Project ID. The only feature you’ll miss is dark mode. That said, it’s better to create a free developer account and use your own Project ID to ensure everything is properly configured and ready for long-term use.
 
 ---
 
