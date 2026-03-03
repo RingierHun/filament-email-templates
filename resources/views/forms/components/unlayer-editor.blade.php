@@ -55,13 +55,27 @@
                     observer.observe(document.documentElement, { attributes: true });
 
                     document.addEventListener('submit', function (e) {
-                        self.handleInterceptedSave(e);
+                        const container = document.getElementById(CONTAINER_ID);
+                        if (container && e.target.contains(container)) {
+                            self.handleInterceptedSave(e);
+                        }
                     }, true);
 
                     document.addEventListener('click', function (e) {
                         const btn = e.target.closest('button.fi-btn, button[type="submit"]');
-                        if (btn && (btn.innerText.includes('Save') || btn.innerText.includes('Create'))) {
-                            self.handleInterceptedSave(e);
+                        if (!btn) return;
+
+                        const text = btn.innerText.trim();
+                        // Only intercept if it's a primary action button (Save/Create)
+                        if (text.includes('Save') || text.includes('Create')) {
+                            const container = document.getElementById(CONTAINER_ID);
+                            const form = btn.closest('form');
+                            
+                            // If the button is inside a form, only intercept if it's OUR form. 
+                            // If it's outside a form (header action), we intercept as long as our editor is present.
+                            if (!form || (container && form.contains(container))) {
+                                self.handleInterceptedSave(e);
+                            }
                         }
                     }, true);
                 },
